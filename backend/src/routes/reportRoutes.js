@@ -3,12 +3,13 @@ const db = require('../db');
 const config = require('../config');
 const { authenticate, authorize } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const { reportSubmissionLimiter, reportReadLimiter } = require('../middleware/rateLimit');
 const { findDepartmentForReport, categoryTypeMap } = require('../services/routingService');
 
 const router = express.Router();
 const allowedCategories = new Set(Object.keys(categoryTypeMap));
 
-router.post('/', authenticate, upload.single('image'), async (req, res, next) => {
+router.post('/', reportSubmissionLimiter, authenticate, upload.single('image'), async (req, res, next) => {
   try {
     const { title, description, category, latitude, longitude } = req.body;
 
@@ -70,7 +71,7 @@ router.post('/', authenticate, upload.single('image'), async (req, res, next) =>
   }
 });
 
-router.get('/me', authenticate, async (req, res, next) => {
+router.get('/me', reportReadLimiter, authenticate, async (req, res, next) => {
   try {
     const result = await db.query(
       `
@@ -91,7 +92,7 @@ router.get('/me', authenticate, async (req, res, next) => {
   }
 });
 
-router.get('/', authenticate, authorize('admin'), async (req, res, next) => {
+router.get('/', authenticate, authorize('admin'), reportReadLimiter, async (req, res, next) => {
   try {
     const result = await db.query(
       `

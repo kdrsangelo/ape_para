@@ -109,4 +109,16 @@ npm run dev
 
 Optional env:
 
-- `VITE_API_BASE_URL` (default: `http://localhost:5000/api`)
+- `VITE_API_BASE_URL` (default: `http://localhost:5000/api` in development and `/api` in production)
+
+## Vercel
+
+The root `vercel.json` defines two services in one Vercel project:
+
+- `frontend` is public at `/`.
+- `backend` is routed publicly through `/api/*` and `/uploads/*`; it remains internal for all other paths.
+
+Set the backend environment variables in Vercel, including `DATABASE_URL` and `JWT_SECRET`. Leave
+`UPLOADS_BASE_URL` unset to generate same-origin `/uploads/...` URLs, or set it to the deployed
+public origin when an absolute URL is required. The frontend uses the same-origin `/api` route by
+default; `VITE_API_BASE_URL` is only needed for a different API origin.
